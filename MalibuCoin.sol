@@ -21,16 +21,16 @@ import "./BeachHutMembershipI.sol";
                                        
 contract MalibuCoin is ERC20, Ownable, ReentrancyGuard {
 
-    uint256 public constant maxSupply = 1000000000000000000000000; //(* 10 ** decimals())
-    uint32 public rewardsPerRound = 50;
-    uint32 public genesisRewardsPerRound = 50;
+    uint256 public constant maxSupply = xxxxxxxxx; //(* 10 ** 18)
+    uint32 public rewardsPerRound = xxx;
+    uint32 public genesisRewardsPerRound = xxx;
     uint256 public epochLength;
+    uint32 public genesisTokenId = 1;
 
     BeachHutMembershipI public membership;
 
     constructor() ERC20("Malibu Coin", "KMC") {
-        epochLength = 86400; // seconds
-        _mint(msg.sender, 1000000000000000000000);
+        epochLength = xxx; // seconds
     }
 
     function claimMalibuCoins() 
@@ -63,7 +63,7 @@ contract MalibuCoin is ERC20, Ownable, ReentrancyGuard {
             membershipTokenId++;
             if (membership.balanceOf(account, membershipTokenId) >= 1) {
                 if (!isGenesisOwner) {
-                    isGenesisOwner = membershipTokenId == 1 ? true : false;
+                    isGenesisOwner = membershipTokenId == genesisTokenId ? true : false;
                 }
                 isOwner = true;
                 membershipTokenCount += membership.balanceOf(account, membershipTokenId);
@@ -88,7 +88,7 @@ contract MalibuCoin is ERC20, Ownable, ReentrancyGuard {
         }
 
         calculatedAmount += (((rewards * epochsToReward) * membershipTokenCount) + extras);
-        calculatedAmount = mintMaxSupply((calculatedAmount * 10 ** decimals()));
+        calculatedAmount = mintMaxSupply((calculatedAmount * 10 ** 18));
     }
     
     function mintMaxSupply(uint256 amount) private view returns (uint256) { 
@@ -107,7 +107,7 @@ contract MalibuCoin is ERC20, Ownable, ReentrancyGuard {
     // Admin Functions
     //=============================================================================
 
-    function setMewardsPerRound(uint32 qty) public onlyOwner {
+    function setRewardsPerRound(uint32 qty) public onlyOwner {
         rewardsPerRound = qty;
     }
 
@@ -119,8 +119,24 @@ contract MalibuCoin is ERC20, Ownable, ReentrancyGuard {
         epochLength = epoch;
     }
 
-    function setBeachHutMembership(address _contract) external  {
+    function setGenesisTokenId(uint32 id) public onlyOwner {
+        genesisTokenId = id;
+    }
+
+    function setBeachHutMembership(address _contract) external onlyOwner {
         require(_contract != address(0), "Can not be address 0");
         membership = BeachHutMembershipI(_contract);
     }
+
+
+
+
+
+    // function testMint(address to, uint256 amount) public onlyOwner {
+    //     _mint(to, (amount * 10 ** 18));
+    // }
+
+    // function burn(address _owner, uint256 _amount) external {
+    //     _burn(_owner, _amount);
+    // }
 }
