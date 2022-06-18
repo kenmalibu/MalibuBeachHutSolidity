@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./MalibuCoinI.sol";
+import "./ERC721AI.sol";
 
 //     __    __  ______  __      __  ______  __  __                                    
 //    /\ "-./  \/\  __ \/\ \    /\ \/\  == \/\ \/\ \                                   
@@ -25,30 +26,40 @@ import "./MalibuCoinI.sol";
 
 contract BeachHutMembership is ERC1155Supply, Ownable, ReentrancyGuard {
 
-    string collectionName = "Beach Hut Membership";
-    string collectionSymbol = "MBHM";
-    string collectionURI = "ipfs://Qmdp5xB3W7qgorsV3TsZBhPCfCq7YHt1qdmQDt98dNAnex/";
+    string collectionURI = "";
     string private name_;
     string private symbol_; 
     uint256 public tokenPrice;
+    uint256 public tokenDiscount;
     uint256 public tokenQty;
     uint256 public maxMintQty;
     uint256 public currentTokenId;
     bool public paused;
     address public CoinContract;
+    address public BABHContract;
 
     mapping(address => uint256) private lastRewardOfCoins;
     mapping(address => uint256) private retroActiveReward;
 
     MalibuCoinI public coin;
+    ERC721AI public babh;
 
     constructor() ERC1155(collectionURI) {
-        name_ = collectionName;
-        symbol_ = collectionSymbol;
-        tokenPrice = 0.05 ether;
+        name_ = "Beach Hut Membership";
+        symbol_ = "MBHM";
+        tokenPrice = 0.15 ether;
+        tokenDiscount = 0.05 ether;
         tokenQty = 50;
         maxMintQty = 2;
         currentTokenId = 1;
+    }
+    
+    function name() public view returns (string memory) {
+      return name_;
+    }
+
+    function symbol() public view returns (string memory) {
+      return symbol_;
     }
 
     function mint(uint256 amount)
@@ -56,12 +67,19 @@ contract BeachHutMembership is ERC1155Supply, Ownable, ReentrancyGuard {
         payable
         nonReentrant
     {
-        require(tx.origin == _msgSender(), "The caller is another contract");
         require(paused == false, "Minting is paused");
         require(totalSupply(currentTokenId) < tokenQty, "All Minted");
         require(amount <= maxMintQty, "Mint quantity is too high");
-        require(amount * tokenPrice == msg.value, "You have not sent the correct amount of ETH");
+        require(tx.origin == _msgSender(), "The caller is another contract");
 
+        if(babh.balanceOf(_msgSender()) > 0) {
+            tokenPrice = tokenPrice - tokenDiscount;
+            if(babh.balanceOf(_msgSender()) >= 10) {
+                tokenPrice = tokenPrice - tokenDiscount;
+            }
+        } 
+
+        require(amount * tokenPrice == msg.value, "You have not sent the correct amount of ETH");
         _mint(_msgSender(), currentTokenId, amount, "");
     }
 
@@ -107,6 +125,10 @@ contract BeachHutMembership is ERC1155Supply, Ownable, ReentrancyGuard {
         tokenPrice = price;
     }
 
+    function setTokenDiscount(uint256 price) public onlyOwner {
+        tokenDiscount = price;
+    }
+
     function setTokenQty(uint256 qty) public onlyOwner {
         tokenQty = qty;
     }
@@ -123,15 +145,21 @@ contract BeachHutMembership is ERC1155Supply, Ownable, ReentrancyGuard {
         paused = !paused;
     }
 
-    function setMalibuCoin(address _contract) external  {
+    function setBABHContract(address _contract) external onlyOwner {
+        require(_contract != address(0), "Can not be address 0");
+        babh = ERC721AI(_contract);
+        BABHContract = _contract;
+    }
+
+    function setMalibuCoin(address _contract) external onlyOwner {
         require(_contract != address(0), "Can not be address 0");
         coin = MalibuCoinI(_contract);
         CoinContract = _contract;
     }
 
     function withdrawETH() public onlyOwner {
-		payable(_msgSender()).transfer(address(this).balance);
-	}
+        payable(_msgSender()).transfer(address(this).balance);
+    }
 
     //=============================================================================
     // Override Functions
