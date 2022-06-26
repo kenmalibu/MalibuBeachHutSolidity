@@ -8,17 +8,6 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./MalibuCoinI.sol";
 
-
-
-
-
-
-
-import "hardhat/console.sol";
-
-
-
-
 contract BeachHutPasses is ERC1155Supply, Ownable, ReentrancyGuard {
 
     string collectionURI = "";
@@ -61,12 +50,6 @@ contract BeachHutPasses is ERC1155Supply, Ownable, ReentrancyGuard {
 
         coin.transferFrom(_msgSender(), address(this), commissionPrice);
         _mint(_msgSender(), 1, maxMintQty, "");
-
-        console.log(coin.balanceOf(_msgSender()));
-
-
-        console.log(totalSupply(1));
-        console.log(commissionQty);
     }
 
     function mintPrivatePass()
@@ -77,8 +60,6 @@ contract BeachHutPasses is ERC1155Supply, Ownable, ReentrancyGuard {
 
         coin.transferFrom(_msgSender(), address(this), privatePrice);
         _mint(_msgSender(), 2, maxMintQty, "");
-
-        console.log(coin.balanceOf(_msgSender()));
     }
 
     function checkMintRequirements(uint256 id, uint256 price, uint256 qty) private view {
@@ -90,13 +71,6 @@ contract BeachHutPasses is ERC1155Supply, Ownable, ReentrancyGuard {
 
     }
 
-
-
-    // REDEEM PASSES HERE
-    // burn( address account, uint256 id, uint256 value) 
-
-
-
     function redeemCommissionPass() 
         public 
         nonReentrant
@@ -107,7 +81,6 @@ contract BeachHutPasses is ERC1155Supply, Ownable, ReentrancyGuard {
         _burn(_msgSender(),1, 1);
     }
 
-
     function redeemPrivatePass() 
         public 
         nonReentrant
@@ -117,13 +90,6 @@ contract BeachHutPasses is ERC1155Supply, Ownable, ReentrancyGuard {
 
        _burn(_msgSender(),2, 1);
     }
-
-
-
-
-
-
-
 
     //=============================================================================
     // Private Functions
