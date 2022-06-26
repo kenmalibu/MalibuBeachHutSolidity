@@ -31,6 +31,7 @@ contract BeachHutMembership is ERC1155Supply, Ownable, ReentrancyGuard {
     string private symbol_; 
     uint256 public tokenPrice;
     uint256 public tokenDiscount;
+    uint256 public salesPrice;
     uint256 public tokenQty;
     uint256 public maxMintQty;
     uint256 public currentTokenId;
@@ -68,18 +69,19 @@ contract BeachHutMembership is ERC1155Supply, Ownable, ReentrancyGuard {
         nonReentrant
     {
         require(paused == false, "Minting is paused");
-        require(totalSupply(currentTokenId) < tokenQty, "All Minted");
+        require(totalSupply(currentTokenId) < tokenQty, "Memberships all minted");
         require(amount <= maxMintQty, "Mint quantity is too high");
         require(tx.origin == _msgSender(), "The caller is another contract");
 
+        salesPrice = tokenPrice;
         if(babh.balanceOf(_msgSender()) > 0) {
-            tokenPrice = tokenPrice - tokenDiscount;
+            salesPrice = salesPrice - tokenDiscount;
             if(babh.balanceOf(_msgSender()) >= 10) {
-                tokenPrice = tokenPrice - tokenDiscount;
+                salesPrice = salesPrice - tokenDiscount;
             }
         } 
 
-        require(amount * tokenPrice == msg.value, "You have not sent the correct amount of ETH");
+        require(amount * salesPrice == msg.value, "You have not sent the correct amount of ETH");
         _mint(_msgSender(), currentTokenId, amount, "");
     }
 
