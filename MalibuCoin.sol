@@ -21,16 +21,16 @@ import "./BeachHutMembershipI.sol";
                                        
 contract MalibuCoin is ERC20, Ownable, ReentrancyGuard {
 
-    uint256 public constant maxSupply = xxxxxxxxx; //(* 10 ** 18)
-    uint32 public rewardsPerRound = xxx;
-    uint32 public genesisRewardsPerRound = xxx;
+    uint256 public constant maxSupply = 1000000000 * 10 ** 18; //(* 10 ** 18)
+    uint32 public rewardsPerRound = 50;
+    uint32 public genesisRewardsPerRound = 50;
     uint256 public epochLength;
     uint32 public genesisTokenId = 1;
 
     BeachHutMembershipI public membership;
 
     constructor() ERC20("Malibu Coin", "KMC") {
-        epochLength = xxx; // seconds
+        epochLength = 86400; // seconds
     }
 
     function claimMalibuCoins() 
@@ -127,16 +127,4 @@ contract MalibuCoin is ERC20, Ownable, ReentrancyGuard {
         require(_contract != address(0), "Can not be address 0");
         membership = BeachHutMembershipI(_contract);
     }
-
-
-
-
-
-    // function testMint(address to, uint256 amount) public onlyOwner {
-    //     _mint(to, (amount * 10 ** 18));
-    // }
-
-    // function burn(address _owner, uint256 _amount) external {
-    //     _burn(_owner, _amount);
-    // }
 }
